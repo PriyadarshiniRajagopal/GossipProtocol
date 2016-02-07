@@ -1,0 +1,65 @@
+Steps to compile the program : 
+
+make clean; make
+
+Interpreting output : 
+The code will generate X files numbered from 1 to X corresponding to each node. 
+For each X, the file contents specify OK/FAIL in the first line. Remaining lines specify the neighbour list with thier respective heartbeat counts. 
+
+Analysis:
+Testcase 1: ./p4 3 1 1 1 1 1 1 5 & ./p4 3 1 1 1 1 1 1 5 & ./p4 3 1 1 1 1 1 1 5 
+
+The output is as follows:
+list1
+OK
+2 0
+3 3 
+
+list2
+FAIL
+1 1 
+3 0
+
+list3
+OK
+1 3 
+2 0
+
+random number generator seed, S = 1. S is used to generate the random sequence used to fail the node when local_time % P is 0. 
+S + nodeID is used as seed to generate random sequence for selecting 'b' neighbours. 
+
+Interpretation of output:
+Since B = 1, one node failed i.e. node#2. 
+The gossip protocol seems to have converged after T=5 seconds. As seen from output, the heartbeat count for node#2 as seen by nodes #1 and 2 is 0 indicating that node#2 is dead. Node#1 sees node#3 alive since the heatbeat count is 3 and vice versa. Node#2, while it was alive, received a heatbeat from node#1
+
+Testcase 2: ./p4 4 2 2 1 1 1 1 5 & ./p4 4 2 2 1 1 1 1 5 & ./p4 4 2 2 1 1 1 1 5 & ./p4 4 2 2 1 1 1 1 5
+
+The output observed is :
+list1
+OK
+2 4
+3 3
+4 1
+
+list2
+OK
+1 4
+3 4
+4 2
+
+list3
+OK
+1 2
+2 2
+4 0
+
+list4
+FAIL
+1 1
+2 1
+3 0
+
+Interpretation of output : 
+B = 1, single node i.e. node#4 failed. Nodes #1 and #3 detect failure using gossip as reflected by the heatbeat count. 
+Node#1 and #2 detect each other as alive as the heartbeat count is high amongst them.
+Nodes#1 and #2 probably consider node#3 as dead due to high heartbeat count.   
